@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMPN 10 BANAWA SELATAN</title>
+    <style>
+        /* CSS Sederhana untuk Tampilan */
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            margin: 0; padding: 20px; 
+            background-color: #f4f7f6; 
+            color: #333;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+        .header { text-align: center; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
+        .view { display: none; margin-top: 20px; }
+        .view.active { display: block; }
+        .card { 
+            background: #fff; border: 1px solid #ddd; border-radius: 8px; 
+            padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        nav { background: #eee; padding: 10px; border-radius: 8px; text-align: center; }
+        nav button { 
+            font-size: 16px; padding: 10px 20px; margin: 5px; 
+            border: none; border-radius: 5px; cursor: pointer; background: #007bff; color: white;
+        }
+        nav button.active { background: #0056b3; }
+        nav button#btn-siswa { background: #28a745; }
+        nav button#btn-siswa.active { background: #1e7e34; }
+        
+        /* Style Form */
+        form label { display: block; margin-top: 10px; font-weight: bold; }
+        form input[type="text"], form textarea {
+            width: 100%; padding: 8px; margin-top: 5px; border-radius: 4px; border: 1px solid #ccc;
+            box-sizing: border-box; /* Agar padding tidak merusak layout */
+        }
+        form button { 
+            font-size: 16px; padding: 10px 20px; margin-top: 20px; 
+            border: none; border-radius: 5px; cursor: pointer; background: #007bff; color: white;
+        }
+        #materi-detail-links { margin-top: 15px; }
+        #materi-detail-links a { 
+            display: inline-block; margin-right: 10px; margin-bottom: 10px; padding: 10px 15px; 
+            background: #e9ecef; color: #007bff; text-decoration: none; border-radius: 5px; 
+        }
+        #materi-detail-links a:hover { background: #d6dbe0; }
+        #materi-list .card { cursor: pointer; }
+        #materi-list .card:hover { background-color: #fcfcfc; border-color: #007bff; }
+        #loading { font-size: 18px; text-align: center; color: #555; }
+        .back-button { 
+            font-size: 14px; padding: 8px 12px; cursor: pointer; 
+            background: #6c757d; color: white; border: none; border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>SMPN 10 BANAWA SELATAN</h1>
+            <p>Sistem Interaktif Monitoring Pembelajaran</p>
+        </div>
+
+        <nav>
+            <strong>Simulasi Peran:</strong>
+            <button id="btn-guru">👨‍🏫 Guru</button>
+            <button id="btn-siswa">🧑‍🎓 Siswa</button>
+        </nav>
+
+        <div id="view-guru" class="view">
+            <h2>Dashboard Guru: Tambah Materi Baru</h2>
+            <div class="card">
+                <form id="form-materi">
+                    <label for="judul">Judul Materi</label>
+                    <input type="text" id="judul" name="judul" required>
+
+                    <label for="deskripsi">Deskripsi Singkat</label>
+                    <textarea id="deskripsi" name="deskripsi" rows="3"></textarea>
+
+                    <label for="linkVideo">Link Video (YouTube, dll)</label>
+                    <input type="text" id="linkVideo" name="linkVideo" placeholder="https://youtube.com/watch?v=...">
+
+                    <label for="linkGambar">Link Gambar</label>
+                    <input type="text" id="linkGambar" name="linkGambar" placeholder="https://example.com/gambar.jpg">
+
+                    <label for="linkBuku">Link Buku (PDF/Web)</label>
+                    <input type="text" id="linkBuku" name="linkBuku" placeholder="https://example.com/buku.pdf">
+
+                    <label for="linkLKPD">Link LKPD (Google Form)</label>
+                    <input type="text" id="linkLKPD" name="linkLKPD" placeholder="https://forms.gle/..." required>
+
+                    <button type="submit" id="btn-submit-materi">Kirim Materi</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="view-siswa-list" class="view">
+            <h2>Dashboard Siswa: Pilih Materi</h2>
+            <div id="loading">Memuat materi...</div>
+            <div id="materi-list">
+                </div>
+        </div>
+
+        <div id="view-siswa-detail" class="view">
+            <button class="back-button" onclick="showView('view-siswa-list')">Kembali ke Daftar Materi</button>
+            <h2 id="materi-detail-judul"></h2>
+            <p id="materi-detail-deskripsi"></p>
+            
+            <div class="card">
+                <p>Status: <strong id="status-baca">Mulai membaca... (Timer 3 menit berjalan)</strong></p>
+                <div id="materi-detail-links">
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ##################################################################
+        // PENTING! GANTI URL INI DENGAN URL WEB APP ANDA DARI APPS SCRIPT
+        // ##################################################################
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzD8EvZnVr6qrjvVtz_u2xIbrUHiEbqEI_XFLto6xeTNzFQTVJBiFHiSdEH4UvbDGr3DQ/exec";
+        // ##################################################################
+
+
+        // --- State Aplikasi ---
+        let currentView = "";
+        let allMateri = [];
+        let currentMateriID = null;
+        let readTimer = null;
+        // UserID disimulasikan
+        const USER_ID = "Siswa_A"; 
+
+        // --- Elemen DOM ---
+        const views = {
+            guru: document.getElementById("view-guru"),
+            siswaList: document.getElementById("view-siswa-list"),
+            siswaDetail: document.getElementById("view-siswa-detail"),
+        };
+        const buttons = {
+            guru: document.getElementById("btn-guru"),
+            siswa: document.getElementById("btn-siswa"),
+        };
+        const loading = document.getElementById("loading");
+        const materiListContainer = document.getElementById("materi-list");
+
+        // --- Fungsi Logika Utama ---
+
+        /**
+         * Mengganti tampilan (view) yang aktif
+         */
+        function showView(viewName) {
+            currentView = viewName;
+            
+            // Sembunyikan semua view
+            Object.values(views).forEach(view => view.classList.remove("active"));
+            // Nonaktifkan semua tombol
+            Object.values(buttons).forEach(btn => btn.classList.remove("active"));
+            
+            // Hentikan timer jika pindah halaman
+            if (readTimer) clearTimeout(readTimer);
+
+            // Tampilkan view yang dipilih
+            if (viewName === 'view-guru') {
+                views.guru.classList.add("active");
+                buttons.guru.classList.add("active");
+            } 
+            else if (viewName === 'view-siswa-list') {
+                views.siswaList.classList.add("active");
+                buttons.siswa.classList.add("active");
+                loadMateri(); // Muat materi saat tampilan siswa dibuka
+            }
+            else if (viewName === 'view-siswa-detail') {
+                views.siswaDetail.classList.add("active");
+                buttons.siswa.classList.add("active");
+            }
+        }
+
+        /**
+         * Mengambil data materi dari Google Sheet via Apps Script
+         */
+        function loadMateri() {
+            loading.style.display = "block";
+            materiListContainer.innerHTML = "";
+
+            fetch(`${SCRIPT_URL}?action=getMateri`)
+                .then(response => response.json())
+                .then(data => {
+                    allMateri = data; // Simpan data materi secara global
+                    loading.style.display = "none";
+                    if(data.length === 0) {
+                        materiListContainer.innerHTML = "<p>Belum ada materi yang ditambahkan oleh guru.</p>";
+                        return;
+                    }
+                    // Render setiap materi sebagai 'card'
+                    data.forEach(materi => {
+                        const card = document.createElement("div");
+                        card.className = "card";
+                        card.innerHTML = `<h3>${materi.judul}</h3><p>${materi.deskripsi}</p>`;
+                        // Tambahkan event klik untuk melihat detail
+                        card.onclick = () => viewMateriDetail(materi.materiID);
+                        materiListContainer.appendChild(card);
+                    });
+                })
+                .catch(error => {
+                    loading.innerHTML = "Gagal memuat materi. Cek konsol.";
+                    console.error("Error fetching materi:", error);
+                });
+        }
+
+        /**
+         * Menampilkan detail materi yang dipilih
+         */
+        function viewMateriDetail(materiID) {
+            currentMateriID = materiID;
+            const materi = allMateri.find(m => m.materiID == materiID);
+            if (!materi) return;
+
+            // Isi konten detail
+            document.getElementById("materi-detail-judul").innerText = materi.judul;
+            document.getElementById("materi-detail-deskripsi").innerText = materi.deskripsi;
+            
+            const linksContainer = document.getElementById("materi-detail-links");
+            linksContainer.innerHTML = ""; // Kosongkan link sebelumnya
+
+            // Tambahkan link dinamis
+            if(materi.linkVideo) {
+                linksContainer.appendChild(createTrackedLink("🎞️ Tonton Video", materi.linkVideo, "Klik Link Video", 10));
+            }
+            if(materi.linkGambar) {
+                linksContainer.appendChild(createTrackedLink("🖼️ Lihat Gambar", materi.linkGambar, "Klik Link Gambar", 10));
+            }
+            if(materi.linkBuku) {
+                linksContainer.appendChild(createTrackedLink("📚 Baca Buku", materi.linkBuku, "Klik Link Buku", 10));
+            }
+            if(materi.linkLKPD) {
+                // Link LKPD spesial, dia juga mencatat poin submit
+                linksContainer.appendChild(createTrackedLink("📝 Kerjakan LKPD", materi.linkLKPD, "Submit LKPD", 50));
+            }
+
+            // Mulai timer membaca 3 menit
+            const statusBaca = document.getElementById("status-baca");
+            statusBaca.innerText = "Mulai membaca... (Timer 3 menit berjalan)";
+            statusBaca.style.color = "#333";
+            
+            readTimer = setTimeout(() => {
+                statusBaca.innerText = "Selesai (✅ Poin 20 telah dicatat)";
+                statusBaca.style.color = "green";
+                logAktivitas(USER_ID, currentMateriID, "Baca > 3 Menit", 20);
+            }, 180000); // 3 menit = 180,000 milidetik
+
+            // Tampilkan view detail
+            showView('view-siswa-detail');
+        }
+
+        /**
+         * Helper untuk membuat link yang bisa melacak klik
+         */
+        function createTrackedLink(text, url, aksi, poin) {
+            const a = document.createElement("a");
+            a.href = url;
+            a.innerText = text;
+            a.target = "_blank"; // Buka di tab baru
+            a.onclick = (e) => {
+                // Catat aktivitas saat diklik
+                logAktivitas(USER_ID, currentMateriID, aksi, poin);
+                alert(`Poin ${poin} untuk "${aksi}" telah dicatat!`);
+            };
+            return a;
+        }
+
+        /**
+         * Mengirim data aktivitas (poin) ke Google Sheet
+         */
+        function logAktivitas(userID, materiID, aksi, poin) {
+            console.log(`Logging: ${userID}, ${materiID}, ${aksi}, ${poin}`);
+            const formData = new FormData();
+            formData.append("action", "logAktivitas");
+            formData.append("userID", userID);
+            formData.append("materiID", materiID);
+            formData.append("aksi", aksi);
+            formData.append("poin", poin);
+            
+            fetch(SCRIPT_URL, {
+                method: "POST",
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status !== "success") {
+                    console.error("Gagal mencatat aktivitas:", data.message);
+                }
+            });
+        }
+
+        /**
+         * Mengirim form materi baru (Guru)
+         */
+        function handleMateriSubmit(e) {
+            e.preventDefault(); // Mencegah reload halaman
+            const form = e.target;
+            const btnSubmit = document.getElementById("btn-submit-materi");
+            btnSubmit.disabled = true;
+            btnSubmit.innerText = "Mengirim...";
+
+            const formData = new FormData(form);
+            formData.append("action", "addMateri"); // Tambahkan parameter 'action'
+
+            fetch(SCRIPT_URL, {
+                method: "POST",
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === "success") {
+                    alert("Materi berhasil ditambahkan!");
+                    form.reset(); // Kosongkan form
+                } else {
+                    alert("Gagal menambahkan materi: " + data.message);
+                }
+            })
+            .catch(error => {
+                alert("Terjadi error: " + error.message);
+                console.error("Error submitting form:", error);
+            })
+            .finally(() => {
+                btnSubmit.disabled = false;
+                btnSubmit.innerText = "Kirim Materi";
+            });
+        }
+
+        // --- Event Listeners ---
+        buttons.guru.onclick = () => showView('view-guru');
+        buttons.siswa.onclick = () => showView('view-siswa-list');
+        document.getElementById("form-materi").addEventListener("submit", handleMateriSubmit);
+
+        // --- Inisialisasi ---
+        showView('view-siswa-list'); // Tampilan default saat pertama dibuka
+
+    </script>
+</body>
+</html>
