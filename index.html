@@ -13,7 +13,38 @@
             color: #333;
         }
         .container { max-width: 900px; margin: 0 auto; }
-        .header { text-align: center; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
+        
+        /* ===== CSS HEADER BARU ===== */
+        .header { 
+            display: flex; /* Menggunakan flexbox */
+            align-items: center; /* Logo dan teks sejajar */
+            border-bottom: 2px solid #ddd; 
+            padding-bottom: 15px; 
+            margin-bottom: 15px;
+        }
+        .logo {
+            max-width: 80px; /* Atur ukuran logo */
+            height: auto;
+            margin-right: 20px;
+        }
+        .header-text {
+            text-align: left;
+        }
+        .header-text h1 {
+            margin: 0;
+            color: #0056b3; /* Warna judul sekolah */
+        }
+        .header-text .alamat {
+            font-style: italic;
+            color: #555;
+            font-size: 14px;
+            margin: 5px 0;
+        }
+        .header-text p {
+            margin: 5px 0;
+        }
+        /* ===== AKHIR CSS HEADER ===== */
+        
         .view { display: none; margin-top: 20px; }
         .view.active { display: block; }
         .card { 
@@ -52,16 +83,35 @@
             font-size: 14px; padding: 8px 12px; cursor: pointer; 
             background: #6c757d; color: white; border: none; border-radius: 5px;
         }
+
+        /* ===== CSS UNTUK FOOTER ===== */
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            font-size: 14px;
+            color: #888;
+        }
+        .footer p {
+            margin: 5px 0;
+        }
+        /* ===== AKHIR CSS FOOTER ===== */
     </style>
 </head>
 <body>
 
     <div class="container">
+        
         <div class="header">
-            <h1>SMPN 10 BANAWA SELATAN</h1>
-            <p>Sistem Interaktif Monitoring Pembelajaran</p>
+            <img src="tutwuri.png" alt="Logo Sekolah" class="logo">
+            
+            <div class="header-text">
+                <h1>SMPN 10 BANAWA SELATAN</h1>
+                <p class="alamat">Jl. Jalan PNPM Dusun III Bambami, Desa Malino, Kec. Banawa Selatan, Kab. Donggala, Sulawesi Tengah</p>
+                <p>Sistem Interaktif Monitoring Pembelajaran</p>
+            </div>
         </div>
-
         <nav>
             <strong>Simulasi Peran:</strong>
             <button id="btn-guru">👨‍🏫 Guru</button>
@@ -113,9 +163,13 @@
                     </div>
             </div>
         </div>
-    </div>
 
-    <script>
+
+        <div class="footer">
+            <p>&copy; 2025 SMPN 10 BANAWA SELATAN. Hak Cipta Dilindungi.</p>
+            <p>Dikembangkan untuk mendukung pembelajaran interaktif.</p>
+        </div>
+        </div> <script>
         // ##################################################################
         // PENTING! GANTI URL INI DENGAN URL WEB APP ANDA DARI APPS SCRIPT
         // ##################################################################
@@ -246,7 +300,7 @@
             readTimer = setTimeout(() => {
                 statusBaca.innerText = "Selesai (✅ Poin 20 telah dicatat)";
                 statusBaca.style.color = "green";
-                logAktivitas(USER_ID, currentMateriID, "Baca > 3 Menit", 20);
+                logAktivITAS(USER_ID, currentMateriID, "Baca > 3 Menit", 20); // Perbaikan typo: logAktivitas
             }, 180000); // 3 menit = 180,000 milidetik
 
             // Tampilkan view detail
