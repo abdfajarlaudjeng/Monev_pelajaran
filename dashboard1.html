@@ -138,13 +138,14 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script>
-        // ##################################################################
-        // PENTING! GANTI DENGAN URL WEB APP ANDA
-        // ##################################################################
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz8wBExoptZ-ddA_JgqRnBea1FYTsviOEc0zejYq-keUHzxTo9ZE-zm76ELWioRwkxkDQ/exec";
-        // ##################################################################
-// Elemen DOM
+
+    <script>
+        // ##################################################################
+        // PENTING! GANTI DENGAN URL WEB APP ANDA
+        // ##################################################################
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyRTpWC5ZhmBV45y3Tt7Dgo_fEAXj3uD71K013WwqDDi5cCaKlgfG_J1biN7CF-tNFT1w/exec";
+        // ##################################################################
+        // Elemen DOM
         const absensiBody = document.getElementById("absensi-table-body");
         const aktivitasBody = document.getElementById("aktivitas-table-body");
         const statusText = document.getElementById("status-text");
@@ -161,22 +162,12 @@
          * ==========================================================
          */
         function showImage(url) {
-            // Tampilkan foto dari Google Drive
-            // Kita perlu mengekstrak FILE_ID dari URL
-            // Contoh URL: https://drive.google.com/file/d/FILE_ID/view?usp=sharing
-            
             try {
-                // 1. Ambil bagian setelah '/d/'
                 const idPart = url.split('/d/')[1]; 
-                
-                // 2. Ambil bagian sebelum '/' berikutnya
                 const fileId = idPart.split('/')[0];
-                
-                // 3. Buat link "Thumbnail" (lebih stabil) dengan ukuran w600
-                // Ini adalah cara paling handal untuk embed gambar Google Drive
+                // Gunakan /thumbnail untuk embed yang lebih stabil
                 const previewUrl = `https://drive.google.com/thumbnail?id=${fileId}&sz=w600`;
                 
-                // 4. Atur src gambar dan tampilkan modal
                 imagePreview.src = previewUrl;
                 imageModal.show();
             } catch (error) {
@@ -188,7 +179,6 @@
         // AKHIR PERBAIKAN
         // ==========================================================
 
-
         /**
          * Fungsi untuk memformat Timestamp
          */
@@ -197,7 +187,7 @@
             const d = new Date(isoString);
             return d.toLocaleString('id-ID', { 
                 dateStyle: 'medium', 
-  _             timeStyle: 'short',
+                timeStyle: 'short',
                 hour12: false
             });
         }
@@ -221,7 +211,7 @@
                 }
 
                 const absensiData = await absensiRes.json();
-                const aktivitasData = await aktivitasRes.json();
+JSON               const aktivitasData = await aktivitasRes.json();
 
                 // 1. Render Tabel Absensi
                 absensiBody.innerHTML = ""; // Kosongkan tabel
@@ -232,21 +222,20 @@
                         // Cek FotoLink dan buat tombol mata
                         let fotoCell = '<td>-</td>'; // Default jika tidak ada link
                         if (row.FotoLink && row.FotoLink.includes('google.com')) {
-                            // PENTING: Kirim 'row.FotoLink' sebagai string ke dalam onclick
                             fotoCell = `
                                 <td>
-                                    <button class="btn btn-sm btn-outline-primary" onclick="showImage('${row.FotoLink}')">
+A                                 <button class="btn btn-sm btn-outline-primary" onclick="showImage('${row.FotoLink}')">
                                         <i class="bi bi-eye-fill"></i> Lihat
                                     </button>
-                                </td>`;
+JSON                         </td>`;
                         }
 
                         tr.innerHTML = `
-                            <td>${formatTanggal(row.Timestamp)}</td>
+A                         <td>${formatTanggal(row.Timestamp)}</td>
                             <td>${row.Nama}</td>
                             <td>${row.Kelas}</td>
                             <td>${row.UserID}</td>
-                            <td>${row.Latitude}, ${row.Longitude}</td>
+A                         <td>${row.Latitude}, ${row.Longitude}</td>
                             ${fotoCell}
                         `;
                         absensiBody.appendChild(tr);
@@ -267,20 +256,20 @@
                             <td>${row.Aksi}</td>
                             <td>${row.Poin}</td>
                             <td>${row.MateriID}</td>
-                            <td>${row.UserID}</td>
+id                         <td>${row.UserID}</td>
                         `;
                         aktivitasBody.appendChild(tr);
                     });
-                } else {
+            _   } else {
                     aktivitasBody.innerHTML = '<tr><td colspan="7" class="text-center">Belum ada data aktivitas.</td></tr>';
-A           }
+                }
 
                 statusText.innerText = `Idle (Terakhir update: ${formatTanggal(new Date())})`;
 
-            } catch (error) {
+style       } catch (error) {
                 console.error("Error fetching data:", error);
                 statusText.innerText = `Error: ${error.message}`;
-            } finally {
+  S       } finally {
                 loadingSpinner.style.display = "none";
                 pageLoader.style.display = "none"; // Sembunyikan loader halaman
             }
@@ -296,8 +285,8 @@ A           }
             // 2. Atur interval "Real-time" (Polling setiap 10 detik)
             // 10000 milidetik = 10 detik
             setInterval(fetchAndRenderData, 10000);
-        });
+line-height   });
 
     </script>
 </body>
-</html>
+</html> 
